@@ -3,6 +3,7 @@ import { TaskItem } from "../interface";
 import { api } from "../api";
 import AddIcon from "../icons/Add";
 import DeleteIcon from "../icons/Delete";
+import LoadingIcon from "../icons/Loading";
 
 function TaskList() {
   const [formData, setFormData] = useState<TaskItem>({
@@ -11,7 +12,8 @@ function TaskList() {
     id: "",
     createdDate: new Date(),
   });
-
+  const [deletingId, setDeletingId] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
   const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [errors, setErrors] = useState<TaskItem>({
     title: "",
@@ -32,6 +34,7 @@ function TaskList() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     setErrors({ ...errors, title: "", description: "" });
     if (!formData.title) {
       setErrors({ ...errors, title: "Title is required" });
@@ -41,13 +44,15 @@ function TaskList() {
       setErrors({ ...errors, description: "Description is required" });
       return;
     }
-    await api.addTask(formData);
     dialogRef.current?.close();
+    const newTask = await api.addTask(formData);
+    setTasks([...tasks, newTask]);
     setFormData({ ...formData, title: "", description: "" });
-    getData();
+    setLoading(false);
   };
 
   const handleDelete = async (id: string) => {
+    setDeletingId(id);
     await api.removeTask(id);
     getData();
   };
@@ -65,6 +70,9 @@ function TaskList() {
       day: "numeric",
       month: "long",
       year: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
     }).format(new Date(date));
   };
 
@@ -132,15 +140,21 @@ function TaskList() {
               className="p-2 bg-red-500 text-white rounded hover:bg-red-600"
               onClick={() => dialogRef.current?.close()}
             >
-              Cancel
+              Close
             </button>
           </div>
         </form>
       </dialog>
       <ul className="">
-        {tasks.length === 0 && (
+        {tasks.length === 0 && !loading && (
           <li className="flex justify-center shadow-md rounded-lg p-4 bg-white">
             No tasks added
+          </li>
+        )}
+
+        {loading && (
+          <li className="flex justify-center items-center shadow-md rounded-lg p-4 bg-white mb-5">
+            <LoadingIcon />
           </li>
         )}
         {tasks.map((task) => (
@@ -155,8 +169,12 @@ function TaskList() {
                 Created on {formatToNiceDate(task.createdDate)}
               </span>
             </div>
-            <button onClick={() => handleDelete(task.id)} title="Delete task">
-              <DeleteIcon />
+            <button
+              onClick={() => handleDelete(task.id)}
+              title="Delete task"
+              disabled={deletingId === task.id}
+            >
+              {deletingId === task.id ? <LoadingIcon /> : <DeleteIcon />}
             </button>
           </li>
         ))}
