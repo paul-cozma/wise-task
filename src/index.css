@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #f5f5f5;
+}
+.dialog-backdrop::backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
