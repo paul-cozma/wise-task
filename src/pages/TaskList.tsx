@@ -5,6 +5,7 @@ import AddIcon from "../icons/Add";
 import DeleteIcon from "../icons/Delete";
 import LoadingIcon from "../icons/Loading";
 import EditIcon from "../icons/Edit";
+import SearchBar from "../SearchBar";
 
 function TaskList() {
   const [formData, setFormData] = useState<TaskItem>({
@@ -14,7 +15,9 @@ function TaskList() {
     createdDate: new Date(),
   });
   const [deletingId, setDeletingId] = useState<string>("");
+  const [cacheTasks, setCacheTasks] = useState<TaskItem[]>([]); // cache tasks for search
   const [loading, setLoading] = useState<boolean>(false);
+  const [searchKeyword, setSearchKeyword] = useState<string>("");
   const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [errors, setErrors] = useState<TaskItem>({
     title: "",
@@ -28,6 +31,7 @@ function TaskList() {
   const getData = async () => {
     const tasks = await api.getTasks();
     setTasks(tasks);
+    setCacheTasks(tasks);
   };
 
   useEffect(() => {
@@ -86,7 +90,12 @@ function TaskList() {
       second: "numeric",
     }).format(new Date(date));
   };
-
+  const searchForTask = () => {
+    const filteredTasks = cacheTasks.filter((task) =>
+      task.title.toLowerCase().includes(searchKeyword.toLowerCase())
+    );
+    setTasks(filteredTasks);
+  };
   return (
     <div className="max-w-6xl w-full">
       <div className="flex gap-3 items-center">
@@ -98,6 +107,11 @@ function TaskList() {
           <AddIcon />
         </button>
       </div>
+      <SearchBar
+        onResetSearch={getData}
+        onSetSearchKeyword={(e: string) => setSearchKeyword(e)}
+        onSearch={searchForTask}
+      />
       <dialog
         open={false}
         ref={dialogRef}
