@@ -10,6 +10,7 @@ interface TaskItem {
   createdDate: Date;
   id: string;
   owner?: string;
+  edit?: boolean;
 }
 
 interface TaskList {

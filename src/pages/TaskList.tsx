@@ -4,6 +4,7 @@ import { api } from "../api";
 import AddIcon from "../icons/Add";
 import DeleteIcon from "../icons/Delete";
 import LoadingIcon from "../icons/Loading";
+import EditIcon from "../icons/Edit";
 
 function TaskList() {
   const [formData, setFormData] = useState<TaskItem>({
@@ -20,6 +21,7 @@ function TaskList() {
     description: "",
     id: "",
     createdDate: new Date(),
+    edit: false,
   });
 
   const dialogRef = React.createRef<HTMLDialogElement>();
@@ -45,9 +47,13 @@ function TaskList() {
       return;
     }
     dialogRef.current?.close();
-    const newTask = await api.addTask(formData);
-    setTasks([...tasks, newTask]);
-    setFormData({ ...formData, title: "", description: "" });
+    const newTasks = formData.edit
+      ? await api.editTask(formData)
+      : await api.addTask(formData);
+
+    setTasks(newTasks);
+
+    setFormData({ ...formData, title: "", description: "", edit: false });
     setLoading(false);
   };
 
@@ -62,6 +68,11 @@ function TaskList() {
   ) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+  };
+
+  const handleEdit = (task: TaskItem) => {
+    setFormData({ ...task, edit: true });
+    dialogRef.current?.showModal();
   };
 
   const formatToNiceDate = (date: Date) => {
@@ -133,12 +144,15 @@ function TaskList() {
               type="submit"
               className="p-2 bg-slate-500 text-white rounded hover:bg-slate-600"
             >
-              Add task
+              {formData.edit ? "Edit" : "Add"} Task
             </button>
             <button
               type="button"
               className="p-2 bg-red-500 text-white rounded hover:bg-red-600"
-              onClick={() => dialogRef.current?.close()}
+              onClick={() =>
+                dialogRef.current?.close() &&
+                setFormData({ ...formData, edit: false })
+              }
             >
               Close
             </button>
@@ -152,7 +166,7 @@ function TaskList() {
           </li>
         )}
 
-        {loading && (
+        {loading && !formData.edit && (
           <li className="flex justify-center items-center shadow-md rounded-lg p-4 bg-white mb-5">
             <LoadingIcon />
           </li>
@@ -160,15 +174,22 @@ function TaskList() {
         {tasks.map((task) => (
           <li
             key={task.id}
-            className="flex justify-between shadow-md rounded-lg p-4 bg-white mb-5"
+            className="flex shadow-md rounded-lg p-4 bg-white mb-5 gap-4"
           >
-            <div className="flex flex-col">
+            <div className="flex flex-col flex-1">
               <h3 className="text-lg font-semibold mb-1">{task.title}</h3>
               <span className="text-sm mb-4">{task.description}</span>
               <span className="text-xs">
                 Created on {formatToNiceDate(task.createdDate)}
               </span>
             </div>
+            <button onClick={() => handleEdit(task)}>
+              {formData.id === task.id && loading ? (
+                <LoadingIcon />
+              ) : (
+                <EditIcon />
+              )}
+            </button>
             <button
               onClick={() => handleDelete(task.id)}
               title="Delete task"

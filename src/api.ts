@@ -22,9 +22,16 @@ export const api = {
     tasks.push(task);
     localStorage.setItem("tasks", JSON.stringify(tasks));
     await waitTime(WAIT_TIME);
-    return task;
+    return tasks;
   },
-
+  async editTask(task: TaskItem) {
+    const tasks: TaskItem[] = JSON.parse(localStorage.getItem("tasks") || "[]");
+    const taskIndex = tasks.findIndex((t: TaskItem) => t.id === task.id);
+    tasks[taskIndex] = task;
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+    await waitTime(WAIT_TIME);
+    return tasks;
+  },
   async removeTask(id: string) {
     const tasks: TaskItem[] = JSON.parse(localStorage.getItem("tasks") || "[]");
     const filteredTasks = tasks.filter((task: TaskItem) => task.id !== id);
