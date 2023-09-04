@@ -1,5 +1,9 @@
 # Registration Form and Task List App
 
+## Hosted using Vercel
+
+[https://wise-task.vercel.app/](https://wise-task.vercel.app/)
+
 ## Table of Contents
 
 1. [Introduction](#introduction)
