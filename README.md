@@ -50,16 +50,16 @@ Feel free to add any additional libraries or tools as you see fit.
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/yourrepository.git
+git clone https://github.com/paul-cozma/wise-task.git
 
 # Navigate to the project directory
-cd yourrepository
+cd wise-task
 
 # Install dependencies
 npm install
 
 # Start the application
-npm start
+npm run dev
 ```
 
 ## Usage
@@ -70,5 +70,3 @@ npm start
 The code can be uploaded to GitHub for version control.
 
 ---
-
-Feel free to modify this template as needed for your project.
